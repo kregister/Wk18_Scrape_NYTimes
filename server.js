@@ -21,6 +21,11 @@ app.use(bodyParser.urlencoded({
 // make public a static dir
 app.use(express.static('public'));
 
+var exphbs = require('express-handlebars');
+app.engine('handlebars', exphbs({
+    defaultLayout: 'main'
+}));
+app.set('view engine', 'handlebars');
 
 // Database configuration with mongoose
 mongoose.connect('mongodb://localhost/wk18-scrape-nytimes');
@@ -47,7 +52,7 @@ var Article = require('./models/article.js');
 
 // Simple index route
 app.get('/', function(req, res) {
-  res.render('main');
+  res.render('home');
 });
 
 // A GET request to scrape the echojs website.

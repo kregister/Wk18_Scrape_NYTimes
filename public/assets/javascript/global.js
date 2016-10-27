@@ -271,16 +271,16 @@ var clickBox = function() {
 };
 
 // ajax call to do the scrape
-var fetchData = function() {
-  // call Fetch with AJAX
-  $.ajax({
-    type: "POST",
-    url: '/fetch'
-  }).done(function() {
-    // show the seek box if it worked
-    $("#seek-box").show();
-  }).fail(function() {
-    // otherwise tell the user an issue has occurred
-    alert("Sorry. Server unavailable.");
-  });
-};
+// var fetchData = function() {
+//   // call Fetch with AJAX
+//   $.ajax({
+//     type: "POST",
+//     url: '/fetch'
+//   }).done(function() {
+//     // show the seek box if it worked
+//     $("#seek-box").show();
+//   }).fail(function() {
+//     // otherwise tell the user an issue has occurred
+//     alert("Sorry. Server unavailable.");
+//   });
+// };
