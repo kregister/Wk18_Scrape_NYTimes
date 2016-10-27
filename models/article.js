@@ -11,19 +11,19 @@ var ArticleSchema = new Schema({
     required:true
   },
   // link is required
-  link: {
+  summary: {
     type:String,
     required:true
   },
   // this only saves one note's ObjectId. ref refers to the Note model.
   note: {
       type: Schema.Types.ObjectId,
-      ref: 'Note'
+      ref: 'note'
   }
 });
 
 // Create the Article model with the ArticleSchema
-var Article = mongoose.model('Article', ArticleSchema);
+var Article = mongoose.model('article', ArticleSchema);
 
 // export the model
 module.exports = Article;
