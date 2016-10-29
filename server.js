@@ -28,7 +28,9 @@ app.engine('handlebars', exphbs({
 app.set('view engine', 'handlebars');
 
 // Database configuration with mongoose
-mongoose.connect('mongodb://localhost/wk18-scrape-nytimes');
+
+mongoose.connect('mongodb://heroku_gwqpnlkh:q5vm75te4rmmoffticriqhq9uo@ds039000.mlab.com:39000/heroku_gwqpnlkh');
+// mongoose.connect('mongodb://localhost/wk18-scrape-nytimes');
 var db = mongoose.connection;
 
 // show any mongoose errors
@@ -50,27 +52,36 @@ var Article = require('./models/article.js');
 // Routes
 // ======
 
-// Simple index route
+// Index Route
 app.get('/', function(req, res) {
   res.render('home');
 });
 
-// A GET request to scrape the echojs website.
-app.get('/fetch', function(req, res) {
-	// first, we grab the body of the html with request
+// Post Fetch Route to fetch and store the desired data with cheerio
+app.post('/fetch', function(req, res) {
+
+// Requsts to grab the body of the HTML
   request('http://www.nytimes.com/', function(error, response, html) {
-  	// then, we load that into cheerio and save it to $ for a shorthand selector
+
+// Then that request is loaded into cheerio and saved into $ for easy selection later on.
     var $ = cheerio.load(html);
-    // now, we grab every h2 within an article tag, and do the following:
+
+// now, we grab every h2 within an article tag, and do the following:
     $('article.story.theme-summary').each(function(i, element) {
 
-    		// save an empty result object
+      console.log(element);
+
+    		// Empty object result
 				var result = {};
 
 				// add the text and href of every link,
 				// and save them as properties of the result obj
 				result.title = $(element).find('.story-heading').find('a').text();
 				result.summary = $(element).find('p.summary').text();
+
+        // result.title = $(this).children('h2 a').text();
+				// result.summary = $(this).children('.summary').text();
+
 
 				// using our Article model, create a new entry.
 				// Notice the (result):
@@ -81,11 +92,11 @@ app.get('/fetch', function(req, res) {
 				entry.save(function(err, doc) {
 					// log any errors
 				  if (err) {
-				    console.log(err);
+				    //console.log(err);
 				  }
 				  // or log the doc
 				  else {
-				    console.log(doc);
+				    //console.log(doc);
 				  }
 				});
 
@@ -97,7 +108,10 @@ app.get('/fetch', function(req, res) {
 });
 
 // this will get the articles we scraped from the mongoDB
-app.get('/articles', function(req, res){
+app.get('/check', function(req, res){
+
+	//console.log("got to check");
+
 	// grab every doc in the Articles array
 	Article.find({}, function(err, doc){
 		// log any errors
@@ -111,20 +125,18 @@ app.get('/articles', function(req, res){
 	});
 });
 
-// grab an article by it's ObjectId
-app.get('/articles/:id', function(req, res){
-	// using the id passed in the id parameter,
-	// prepare a query that finds the matching one in our db...
-	Article.findOne({'_id': req.params.id})
-	// and populate all of the notes associated with it.
-	.populate('note')
-	// now, execute our query
-	.exec(function(err, doc){
-		// log any errors
+// this will get the articles we scraped from the mongoDB
+app.post('/gather', function(req, res){
+
+// Grabs all docs in the Articles array
+	Note.find({'id': req.body.id}, function(err, doc){
+
+// log errors if any
 		if (err){
 			console.log(err);
 		}
-		// otherwise, send the doc to the browser as a json object
+
+// If no error the else sends the doc to the browser as a json object
 		else {
 			res.json(doc);
 		}
@@ -134,7 +146,7 @@ app.get('/articles/:id', function(req, res){
 
 // replace the existing note of an article with a new one
 // or if no note exists for an article, make the posted note it's note.
-app.post('/articles/:id', function(req, res){
+app.post('/save', function(req, res){
 	// create a new note and pass the req.body to the entry.
 	var newNote = new Note(req.body);
 
@@ -148,10 +160,11 @@ app.post('/articles/:id', function(req, res){
 		else {
 			// using the Article id passed in the id parameter of our url,
 			// prepare a query that finds the matching Article in our db
-			// and update it to make it's lone note the one we just saved
-			Article.findOneAndUpdate({'_id': req.params.id}, {'note':doc._id})
+
+      // and update it to make it's lone note the one we just saved
+      Article.findOneAndUpdate({'id': req.params.id}, {'note':doc._id})
 			// execute the above query
-			.exec(function(err, doc){
+			.exec(function(err, doc2){
 				// log any errors
 				if (err){
 					console.log(err);
@@ -164,13 +177,29 @@ app.post('/articles/:id', function(req, res){
 	});
 });
 
+app.delete('/delete', function(req, res){
+//
+	Note.remove({'id': req.body.id})
+
+	// Executes the Query
+	.exec(function(err, doc){
+
+// Error Log
+		if (err){
+			console.log(err);
+		}
+		// otherwise, send the doc to the browser as a json object
+		else {
+			res.send(doc);
+		}
+	});
+});
 
 
-
-
+var PORT = process.env.PORT || 3000;
 
 
 // listen on port 3000
-app.listen(3000, function() {
+app.listen(PORT, function() {
   console.log('App running on port 3000!');
 });

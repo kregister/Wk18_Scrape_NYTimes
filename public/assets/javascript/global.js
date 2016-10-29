@@ -103,7 +103,7 @@ var postNote = function(currentNotes) {
 
     // make the note variable equal to itself,
     // plus the new note and a new line
-    note = note + currentNotes[i].noteText + '\n';
+    note = note + currentNotes[i].note + '\n';
   }
   // put the current collection of notes into the notebox
   $("#note-box").val(note);
@@ -198,7 +198,7 @@ var typeIt = function() {
 
   // cycle to different story
   console.log(mongoData);
-  var headline = mongoData[dataCount].headline;
+  var headline = mongoData[dataCount].title;
   var summary = mongoData[dataCount].summary;
   dataCount++;
   // type animation for new summary
@@ -270,7 +270,7 @@ var clickBox = function() {
   });
 };
 
-ajax call to do the scrape
+// ajax call to do the scrape
 var fetchData = function() {
   // call Fetch with AJAX
   $.ajax({
